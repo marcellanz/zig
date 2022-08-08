@@ -1033,8 +1033,6 @@ pub fn create(gpa: Allocator, options: InitOptions) !*Compilation {
             // Even though we may have no Zig code to compile (depending on `options.main_pkg`),
             // we may need to use stage1 for building compiler-rt and other dependencies.
 
-            if (build_options.omit_stage2)
-                break :blk true;
             if (options.use_llvm) |use_llvm| {
                 if (!use_llvm) {
                     break :blk false;
@@ -2180,8 +2178,7 @@ pub fn update(comp: *Compilation) !void {
         comp.c_object_work_queue.writeItemAssumeCapacity(key);
     }
 
-    const use_stage1 = build_options.omit_stage2 or
-        (build_options.is_stage1 and comp.bin_file.options.use_stage1);
+    const use_stage1 = build_options.is_stage1 and comp.bin_file.options.use_stage1;
     if (comp.bin_file.options.module) |module| {
         module.compile_log_text.shrinkAndFree(module.gpa, 0);
         module.generation += 1;
@@ -2357,8 +2354,7 @@ fn flush(comp: *Compilation, prog_node: *std.Progress.Node) !void {
     };
     comp.link_error_flags = comp.bin_file.errorFlags();
 
-    const use_stage1 = build_options.omit_stage2 or
-        (build_options.is_stage1 and comp.bin_file.options.use_stage1);
+    const use_stage1 = build_options.is_stage1 and comp.bin_file.options.use_stage1;
     if (!use_stage1) {
         if (comp.bin_file.options.module) |module| {
             try link.File.C.flushEmitH(module);
@@ -2919,9 +2915,6 @@ pub fn performAllTheWork(
 fn processOneJob(comp: *Compilation, job: Job) !void {
     switch (job) {
         .codegen_decl => |decl_index| {
-            if (build_options.omit_stage2)
-                @panic("sadly stage2 is omitted from this build to save memory on the CI server");
-
             const module = comp.bin_file.options.module.?;
             const decl = module.declPtr(decl_index);
 
@@ -2956,9 +2949,6 @@ fn processOneJob(comp: *Compilation, job: Job) !void {
             }
         },
         .codegen_func => |func| {
-            if (build_options.omit_stage2)
-                @panic("sadly stage2 is omitted from this build to save memory on the CI server");
-
             const named_frame = tracy.namedFrame("codegen_func");
             defer named_frame.end();
 
@@ -2969,9 +2959,6 @@ fn processOneJob(comp: *Compilation, job: Job) !void {
             };
         },
         .emit_h_decl => |decl_index| {
-            if (build_options.omit_stage2)
-                @panic("sadly stage2 is omitted from this build to save memory on the CI server");
-
             const module = comp.bin_file.options.module.?;
             const decl = module.declPtr(decl_index);
 
@@ -3030,9 +3017,6 @@ fn processOneJob(comp: *Compilation, job: Job) !void {
             }
         },
         .analyze_decl => |decl_index| {
-            if (build_options.omit_stage2)
-                @panic("sadly stage2 is omitted from this build to save memory on the CI server");
-
             const module = comp.bin_file.options.module.?;
             module.ensureDeclAnalyzed(decl_index) catch |err| switch (err) {
                 error.OutOfMemory => return error.OutOfMemory,
@@ -3040,9 +3024,6 @@ fn processOneJob(comp: *Compilation, job: Job) !void {
             };
         },
         .update_embed_file => |embed_file| {
-            if (build_options.omit_stage2)
-                @panic("sadly stage2 is omitted from this build to save memory on the CI server");
-
             const named_frame = tracy.namedFrame("update_embed_file");
             defer named_frame.end();
 
@@ -3053,9 +3034,6 @@ fn processOneJob(comp: *Compilation, job: Job) !void {
             };
         },
         .update_line_number => |decl_index| {
-            if (build_options.omit_stage2)
-                @panic("sadly stage2 is omitted from this build to save memory on the CI server");
-
             const named_frame = tracy.namedFrame("update_line_number");
             defer named_frame.end();
 
@@ -3074,9 +3052,6 @@ fn processOneJob(comp: *Compilation, job: Job) !void {
             };
         },
         .analyze_pkg => |pkg| {
-            if (build_options.omit_stage2)
-                @panic("sadly stage2 is omitted from this build to save memory on the CI server");
-
             const named_frame = tracy.namedFrame("analyze_pkg");
             defer named_frame.end();
 
