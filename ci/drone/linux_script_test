@@ -29,7 +29,7 @@ case "$1" in
     ;;
   6)
     ./build/zig build $BUILD_FLAGS test-universal-libc
-    ./build/zig build $BUILD_FLAGS test-compare-output
+    ./build/zig build $BUILD_FLAGS test-compare-output --verbose
     ./build/zig build $BUILD_FLAGS test-standalone -Dskip-release-safe
     ./build/zig build $BUILD_FLAGS test-stack-traces
     ./build/zig build $BUILD_FLAGS test-cli
