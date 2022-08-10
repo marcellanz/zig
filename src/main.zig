@@ -2376,14 +2376,8 @@ fn buildOutputType(
         }
     }
 
-    if (comptime builtin.target.isDarwin()) {
-        // If we want to link against frameworks, we need system headers.
-        if (framework_dirs.items.len > 0 or frameworks.count() > 0)
-            want_native_include_dirs = true;
-    }
-
     if (sysroot == null and cross_target.isNativeOs() and
-        (system_libs.count() != 0 or want_native_include_dirs))
+        (system_libs.count() != 0 or want_native_include_dirs or comptime builtin.target.isDarwin()))
     {
         const paths = std.zig.system.NativePaths.detect(arena, target_info) catch |err| {
             fatal("unable to detect native system paths: {s}", .{@errorName(err)});
